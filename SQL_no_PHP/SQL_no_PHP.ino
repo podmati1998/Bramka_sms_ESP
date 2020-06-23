@@ -2,13 +2,11 @@
 #include <MySQL_Cursor.h>
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266WiFiMulti.h>
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <stdio.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
-#include <ListLib.h>
 
 #define HTTP_REST_PORT 8040
 #define SELECT_MAX_SIZE 100
@@ -71,7 +69,6 @@ void config_rest_server_routing() {
 }
 
 
-
 void getUsers(){
   WiFiClient client;
   MySQL_Connection conn((Client *)&client);
@@ -113,17 +110,9 @@ void getUsers(){
         row = cur_mem->get_next_row();
         if (row != NULL)
         {
-            //e.g convert to a float value
-            // float batchnumber = 0;
-            //   batchnumber = atol(row->values[0]);
-            //   Serial.print("float value: ");
-            //   Serial.println(batchnumber,2);
             String batchnumber_str = "";
             for (int f = 0; f < columns->num_fields; f++)
             {
-                //just print the String value
-                // Serial.print(row->values[f]);
-                // convert value to String
                 batchnumber_str = String(row->values[f]);
                 if(f==0)
                 users[i].id=batchnumber_str.toInt();
@@ -135,98 +124,37 @@ void getUsers(){
                 users[i].phone_number=batchnumber_str;
                 if(f==4)
                 users[i].group_id=batchnumber_str.toInt();
-                Serial.print("batchnumber_str: ");
-                Serial.println(batchnumber_str);
-                if (f < columns->num_fields - 1)
-                {
-                    Serial.print(',');
-                }
             }
-            Serial.println();
         }
     } while (row != NULL);
-    Serial.println("Done");
+    Serial.println("Done reading users");
   // Note: since there are no results, we do not need to read any data
   // Deleting the cursor also frees up memory used
   delete cur_mem;
   Serial.println("closing connection\n");
-//write all DEBUG
-for (int x=0;x<2;x++){
+for (int x=0;x<i;x++){
   Serial.println(users[x].id);
   Serial.println(users[x].name);
   Serial.println(users[x].surname);
   Serial.println(users[x].phone_number);
   Serial.println(users[x].group_id);
 }
-  
-  //client.stop();
+//to json and send response
+  DynamicJsonDocument doc((i+1)*100);
+  for (int x=0;x<i;x++){
+    doc[x]["id"]=users[x].id;
+    doc[x]["name"]=users[x].name;
+    doc[x]["surname"]=users[x].surname;
+    doc[x]["phone_number"]=users[x].phone_number;
+    doc[x]["group_id"]=users[x].group_id;
+  }
+  char jsonChar[10000]; //plik dla eksportu jsonów (max rozmiar to 10kB)
+  serializeJson(doc,jsonChar);
+  Serial.println(jsonChar);
+  http_rest_server.send(200, "application/json", jsonChar);
+  client.stop();
 }
 
-
-/*void mySqlLoop(){
-  WiFiClient client;
-  MySQL_Connection conn((Client *)&client);
-  if (conn.connect(server_addr, 3306, user, passwordSQL)) {
-    Serial.println("Database connected.");
-  }
-  else{
-    Serial.println("Connection failed.");
-    Serial.println("Recording data.");
-  }
-  // Initiate the query class instance
-  MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
-  // Execute the query
-  cur_mem->execute(SELECT_SQL);
-  
-  column_names *columns = cur_mem->get_columns();
-
-    for (int f = 0; f < columns->num_fields; f++)
-    {
-        Serial.print(columns->fields[f]->name);
-        if (f < columns->num_fields - 1)
-        {
-            Serial.print(',');
-        }
-    }
-    Serial.println("Done");
-
-    // Read the rows and print them
-    Serial.println("Fetching with Rows");
-    row_values *row = NULL;
-    do
-    {
-        row = cur_mem->get_next_row();
-        if (row != NULL)
-        {
-            //e.g convert to a float value
-            // float batchnumber = 0;
-            //   batchnumber = atol(row->values[0]);
-            //   Serial.print("float value: ");
-            //   Serial.println(batchnumber,2);
-            String batchnumber_str = "";
-            for (int f = 0; f < columns->num_fields; f++)
-            {
-                //just print the String value
-                // Serial.print(row->values[f]);
-                // convert value to String
-                batchnumber_str = String(row->values[f]);
-                Serial.print("batchnumber_str: ");
-                Serial.println(batchnumber_str);
-                if (f < columns->num_fields - 1)
-                {
-                    Serial.print(',');
-                }
-            }
-            Serial.println();
-        }
-    } while (row != NULL);
-    Serial.println("Done");
-  // Note: since there are no results, we do not need to read any data
-  // Deleting the cursor also frees up memory used
-  delete cur_mem;
-  Serial.println("closing connection\n");
-  //client.stop();
-}*/
 
 void connectToNetwork() {
   WiFi.begin(ssid, password);
