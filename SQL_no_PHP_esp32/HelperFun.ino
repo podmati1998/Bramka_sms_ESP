@@ -35,7 +35,7 @@ void getUserFromId(int id){
         client.stop();
 }
 
-void getHistoryElementFromId(int id){
+void historyElementResponse(int code, int id){
    connectToDB();
         String sql = "SELECT * FROM esp_data.history WHERE esp_data.history.id=";
         sql+=id;    
@@ -71,9 +71,45 @@ void getHistoryElementFromId(int id){
         delete cur_mem;
         serializeJson(doc,jsonChar);
         Serial.println(jsonChar);
-        http_rest_server.send(200, "application/json", jsonChar);
+        http_rest_server.send(code, "application/json", jsonChar);
         client.stop();
 }
+
+void getGroupFromId(int id){
+   connectToDB();    
+          // Initiate the query class instance
+        String sql = "SELECT * FROM esp_data.groups ";
+        sql+="WHERE id=";
+        sql+=id;
+        setQuery(sql);
+        MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+        // Execute the query
+        
+        cur_mem->execute(QUERRY_BUFF);
+        column_names *columns = cur_mem->get_columns();
+        row_values *row = NULL;
+        row = cur_mem->get_next_row();
+        DynamicJsonDocument doc(100);
+        if (row != NULL)
+        {
+          String batchnumber_str = "";
+        for (int f = 0; f < columns->num_fields; f++)
+            {
+              batchnumber_str = String(row->values[f]);
+              if(f==0)
+              doc["group_id"]=batchnumber_str.toInt();
+              if(f==1)
+              doc["group_name"]=batchnumber_str;
+            }           
+        }      
+        delete cur_mem;      
+        memset(jsonChar,0, sizeof(jsonChar));
+        serializeJson(doc,jsonChar); 
+        Serial.println(jsonChar);
+        http_rest_server.send(200, "application/json", jsonChar);
+        client.stop();  
+}
+
 void connectToDB(){
 
   while (!conn.connect(server_addr, 3306, user, passwordSQL)) {
@@ -102,6 +138,6 @@ void connectToNetwork() {
         Serial.println(WiFi.localIP());
  
 }
-void sendSMS(String phone_number,String text){
+int sendSMS(String phone_number,String text){
   
 }

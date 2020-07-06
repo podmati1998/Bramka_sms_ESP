@@ -40,6 +40,14 @@ class User{
   }
 };
 User users[100];
+class Group{
+ public:
+  int id;
+  String name;
+  Group(){
+  }
+};
+Group groups[10];
 class History_element{
  public:
   int id;
@@ -86,10 +94,16 @@ void config_rest_server_routing() {
             "Welcome to the ESP8266 REST Web Server");
     });
     http_rest_server.on("/users", HTTP_GET, getUsers);    
-    http_rest_server.on("/user", HTTP_POST, postUser);
+    http_rest_server.on("/users", HTTP_POST, postUser);
     http_rest_server.on("/user", HTTP_GET, getUser);
-    http_rest_server.on("/user/delete", HTTP_PUT, deleteUser);
-    http_rest_server.on("/user/update", HTTP_PUT, updateUser);
+    http_rest_server.on("/users", HTTP_DELETE, deleteUser);
+    http_rest_server.on("/users", HTTP_PUT, updateUser);   
+    http_rest_server.on("/groups", HTTP_GET, getGroups);
+    http_rest_server.on("/groups", HTTP_POST, postGroup);    
+    http_rest_server.on("/group", HTTP_GET, getGroup);
+    http_rest_server.on("/groups", HTTP_DELETE, deleteGroup);
+    http_rest_server.on("/groups", HTTP_PUT, updateGroup);
     http_rest_server.on("/send_number", HTTP_POST, sendToNumber);
     http_rest_server.on("/send_user", HTTP_POST, sendToUser);
+    http_rest_server.on("/send_group", HTTP_POST, sendToGroup);
 }
