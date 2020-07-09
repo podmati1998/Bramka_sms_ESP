@@ -6,6 +6,7 @@ void sendToGroup(){
     DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
     if (err!=DeserializationError::Ok) {
         Serial.println("error in parsin json body");
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(400);
     }
     else {   
@@ -88,6 +89,7 @@ void sendToNumber(){
     DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
     if (err!=DeserializationError::Ok) {
         Serial.println("error in parsin json body");
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(400);
     }
     else {   

@@ -61,6 +61,7 @@ for (int x=0;x<i;x++){
   serializeJson(doc,jsonChar);
 }
   Serial.println(jsonChar);
+  http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
   http_rest_server.send(200, "application/json", jsonChar);
   client.stop();
 }
@@ -101,6 +102,7 @@ void getUser(){
         delete cur_mem;
         serializeJson(doc,jsonChar);
         Serial.println(jsonChar);
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "application/json", jsonChar);
         client.stop();    
     }
@@ -114,6 +116,7 @@ void postUser(){
     DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
     if (err!=DeserializationError::Ok) {
         Serial.println("error in parsin json body");
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(400);
     }
     else {   
@@ -150,7 +153,7 @@ void postUser(){
 void updateUser(){
   connectToDB();
   //read body
-  StaticJsonDocument<200> doc;
+  StaticJsonDocument<300> doc;
     String post_body = http_rest_server.arg("plain");
     Serial.println(post_body);
     DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
@@ -167,17 +170,16 @@ void updateUser(){
         int group_id = doc["group_id"];
 
           // Initiate the query class instance
-        String sql = "UPDATE esp_data.users SET name = ";
+        String sql = "UPDATE esp_data.users SET name = \"";
         sql+=name;
-        sql+="\",\" surname = ";
+        sql+="\", surname = \"";
         sql+=surname;
-        sql+="\",\" phone_number = ";
+        sql+="\", phone_number = \"";
         sql+=phone_number;
-        sql+="\",\" group_id = ";
+        sql+="\", group_id = ";
         sql+=group_id;
         sql+=" WHERE id = ";
         sql+=id;
-        sql+="\")";
 
         setQuery(sql);
         MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
@@ -203,6 +205,7 @@ void deleteUser(){
         // Execute the query
         cur_mem->execute(QUERRY_BUFF);
         delete cur_mem;
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "application/json", "{ \"id\": \""+id+"\"}");
         client.stop();    
     }

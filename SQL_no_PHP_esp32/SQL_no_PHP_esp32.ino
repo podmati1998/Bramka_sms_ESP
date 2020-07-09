@@ -56,7 +56,11 @@ class History_element{
   String phone_number;
   String text;
   String timestamp;
+  History_element(){
+  }
 };
+History_element history[50];
+
 //stworzenie instancji obiektow globalnych
 WebServer http_rest_server(HTTP_REST_PORT);
 WiFiServer  server(80);
@@ -90,20 +94,24 @@ void loop() {
 //konfiguracja serwera REST
 void config_rest_server_routing() {
     http_rest_server.on("/", HTTP_GET, []() {
+      http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "text/html",
             "Welcome to the ESP8266 REST Web Server");
     });
-    http_rest_server.on("/users", HTTP_GET, getUsers);    
-    http_rest_server.on("/users", HTTP_POST, postUser);
-    http_rest_server.on("/user", HTTP_GET, getUser);
-    http_rest_server.on("/users", HTTP_DELETE, deleteUser);
-    http_rest_server.on("/users", HTTP_PUT, updateUser);   
-    http_rest_server.on("/groups", HTTP_GET, getGroups);
-    http_rest_server.on("/groups", HTTP_POST, postGroup);    
-    http_rest_server.on("/group", HTTP_GET, getGroup);
-    http_rest_server.on("/groups", HTTP_DELETE, deleteGroup);
-    http_rest_server.on("/groups", HTTP_PUT, updateGroup);
-    http_rest_server.on("/send_number", HTTP_POST, sendToNumber);
-    http_rest_server.on("/send_user", HTTP_POST, sendToUser);
-    http_rest_server.on("/send_group", HTTP_POST, sendToGroup);
+    http_rest_server.on("/api/users", HTTP_GET, getUsers);    
+    http_rest_server.on("/api/users", HTTP_POST, postUser);
+    http_rest_server.on("/api/user", HTTP_GET, getUser);
+    http_rest_server.on("/api/users", HTTP_DELETE, deleteUser);
+    http_rest_server.on("/api/users", HTTP_PUT, updateUser);   
+    http_rest_server.on("/api/groups", HTTP_GET, getGroups);
+    http_rest_server.on("/api/groups", HTTP_POST, postGroup);    
+    http_rest_server.on("/api/group", HTTP_GET, getGroup);
+    http_rest_server.on("/api/group_users", HTTP_GET, getGroupUsers);
+    http_rest_server.on("/api/groups", HTTP_DELETE, deleteGroup);
+    http_rest_server.on("/api/groups", HTTP_PUT, updateGroup);
+    http_rest_server.on("/api/send_number", HTTP_POST, sendToNumber);
+    http_rest_server.on("/api/send_user", HTTP_POST, sendToUser);
+    http_rest_server.on("/api/send_group", HTTP_POST, sendToGroup);
+    http_rest_server.on("/api/history_element", HTTP_GET, getHistoryElement);
+    http_rest_server.on("/api/history", HTTP_GET, getHistory);
 }

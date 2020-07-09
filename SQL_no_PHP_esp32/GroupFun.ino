@@ -49,11 +49,49 @@ for (int x=0;x<i;x++){
   serializeJson(doc,jsonChar);
 }
   Serial.println(jsonChar);
+  http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
   http_rest_server.send(200, "application/json", jsonChar);
   client.stop();
 }
-                              //GET GROUP
+    //GET GROUP
 void getGroup(){
+   connectToDB();    
+   String id = http_rest_server.arg("id"); 
+          // Initiate the query class instance
+        String sql = "SELECT * FROM esp_data.groups ";
+        sql+="WHERE id=";
+        sql+=id;
+        setQuery(sql);
+        MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+        // Execute the query
+        
+        cur_mem->execute(QUERRY_BUFF);
+        column_names *columns = cur_mem->get_columns();
+        row_values *row = NULL;
+        row = cur_mem->get_next_row();
+        DynamicJsonDocument doc(100);
+        if (row != NULL)
+        {
+          String batchnumber_str = "";
+        for (int f = 0; f < columns->num_fields; f++)
+            {
+              batchnumber_str = String(row->values[f]);
+              if(f==0)
+              doc["group_id"]=batchnumber_str.toInt();
+              if(f==1)
+              doc["group_name"]=batchnumber_str;
+            }           
+        }      
+        delete cur_mem;      
+        memset(jsonChar,0, sizeof(jsonChar));
+        serializeJson(doc,jsonChar); 
+        Serial.println(jsonChar);
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+        http_rest_server.send(200, "application/json", jsonChar);
+        client.stop();  
+}
+                              //GET GROUP USERS
+void getGroupUsers(){
     connectToDB();
     String id = http_rest_server.arg("id"); 
       // Initiate the query class instance
@@ -103,6 +141,7 @@ void getGroup(){
      memset(jsonChar,0, sizeof(jsonChar));
      serializeJson(doc,jsonChar);
      Serial.println(jsonChar);
+     http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
      http_rest_server.send(200, "application/json", jsonChar);
      client.stop();    
 }
@@ -182,6 +221,7 @@ void deleteGroup(){
         // Execute the query
         cur_mem->execute(QUERRY_BUFF);
         delete cur_mem;
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "application/json", "{ \"id\": \""+id+"\"}");
         client.stop();    
     }

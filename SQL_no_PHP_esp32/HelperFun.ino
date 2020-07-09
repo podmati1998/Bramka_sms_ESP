@@ -31,6 +31,7 @@ void getUserFromId(int id){
         delete cur_mem;
         serializeJson(doc,jsonChar);
         Serial.println(jsonChar);
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "application/json", jsonChar);
         client.stop();
 }
@@ -71,6 +72,7 @@ void historyElementResponse(int code, int id){
         delete cur_mem;
         serializeJson(doc,jsonChar);
         Serial.println(jsonChar);
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(code, "application/json", jsonChar);
         client.stop();
 }
@@ -106,6 +108,7 @@ void getGroupFromId(int id){
         memset(jsonChar,0, sizeof(jsonChar));
         serializeJson(doc,jsonChar); 
         Serial.println(jsonChar);
+        http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
         http_rest_server.send(200, "application/json", jsonChar);
         client.stop();  
 }
