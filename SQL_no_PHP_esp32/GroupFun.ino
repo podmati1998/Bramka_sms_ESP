@@ -1,3 +1,37 @@
+void postUserToGroup(){
+  connectToDB();
+  //read body
+  StaticJsonDocument<200> doc;
+    String post_body = http_rest_server.arg("plain");
+    Serial.println(post_body);
+    DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
+    if (err!=DeserializationError::Ok) {
+        Serial.println("error in parsin json body");
+        http_rest_server.send(400);
+    }
+    else {   
+      if(doc["user_id"]!=0 && doc["group_id"]!=0){
+        int user_id = doc["user_id"];
+        int group_id = doc["group_id"];
+          // Initiate the query class instance
+        String sql = "INSERT INTO esp_data.group_to_user (user_id, group_id) VALUES (";
+        sql+=user_id;
+        sql+=", ";
+        sql+=group_id;
+        sql+=")";
+        setQuery(sql);
+        MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+        // Execute the query
+        cur_mem->execute(QUERRY_BUFF);
+        delete cur_mem;
+        Serial.println(group_id);
+        getGroupUsersFromId(group_id);
+      }
+    }
+}
+
+
+
 void getGroups(){
   
   connectToDB();
@@ -95,8 +129,8 @@ void getGroupUsers(){
     connectToDB();
     String id = http_rest_server.arg("id"); 
       // Initiate the query class instance
-    String sql = "SELECT u.id,u.name,u.surname,u.phone_number FROM esp_data.groups g JOIN esp_data.users u ";
-    sql+="ON g.id=u.group_id WHERE g.id=";
+    String sql = "SELECT u.id,u.name,u.surname,u.phone_number FROM esp_data.group_to_user g JOIN esp_data.users u ";
+    sql+="ON g.user_id=u.id WHERE g.group_id=";
     sql+=id;
     setQuery(sql);
     MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
@@ -145,6 +179,7 @@ void getGroupUsers(){
      http_rest_server.send(200, "application/json", jsonChar);
      client.stop();    
 }
+                  
                               //POST USER
 void postGroup(){
   connectToDB();
@@ -225,3 +260,35 @@ void deleteGroup(){
         http_rest_server.send(200, "application/json", "{ \"id\": \""+id+"\"}");
         client.stop();    
     }
+               //DELETE USER FROM GROUP
+void deleteUserFromGroup(){
+   connectToDB();
+  //read body
+  StaticJsonDocument<200> doc;
+    String post_body = http_rest_server.arg("plain");
+    Serial.println(post_body);
+    DeserializationError err = deserializeJson(doc, http_rest_server.arg("plain"));
+    if (err!=DeserializationError::Ok) {
+        Serial.println("error in parsin json body");
+        http_rest_server.send(400);
+    }
+    else {   
+      if(doc["user_id"]!=0 && doc["group_id"]!=0){
+        int user_id = doc["user_id"];
+        int group_id = doc["group_id"];
+          // Initiate the query class instance
+        String sql = "DELETE FROM esp_data.group_to_user WHERE group_to_user.user_id= ";
+        sql+=user_id;
+        sql+=" AND ";
+        sql+="group_to_user.group_id= ";
+        sql+=group_id;
+        setQuery(sql);
+        MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+        // Execute the query
+        cur_mem->execute(QUERRY_BUFF);
+        delete cur_mem;
+        Serial.println(group_id);
+        getGroupUsersFromId(group_id);
+      }
+    }
+}

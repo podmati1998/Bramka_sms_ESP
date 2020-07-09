@@ -31,8 +31,6 @@ void getUsers(){
                 users[i].surname=batchnumber_str;
                 if(f==3)
                 users[i].phone_number=batchnumber_str;
-                if(f==4)
-                users[i].group_id=batchnumber_str.toInt();
             }
         }
     } while (row != NULL);
@@ -45,7 +43,6 @@ for (int x=0;x<i;x++){
   Serial.println(users[x].name);
   Serial.println(users[x].surname);
   Serial.println(users[x].phone_number);
-  Serial.println(users[x].group_id);
 }
 //to json and send response
 {
@@ -55,7 +52,6 @@ for (int x=0;x<i;x++){
     doc[x]["name"]=users[x].name;
     doc[x]["surname"]=users[x].surname;
     doc[x]["phone_number"]=users[x].phone_number;
-    doc[x]["group_id"]=users[x].group_id;
   }  
   memset(jsonChar,0, sizeof(jsonChar));
   serializeJson(doc,jsonChar);
@@ -95,8 +91,6 @@ void getUser(){
                 doc["surname"]=batchnumber_str;
                 if(f==3)
                 doc["phone_number"]=batchnumber_str;
-                if(f==4)
-                doc["group_id"]=batchnumber_str.toInt();
             }
         }      
         delete cur_mem;
@@ -120,11 +114,10 @@ void postUser(){
         http_rest_server.send(400);
     }
     else {   
-      if(doc["name"]!=0 && doc["surname"]!=0 && doc["phone_number"]!=0 && doc["group_id"]!=0){
+      if(doc["name"]!=0 && doc["surname"]!=0 && doc["phone_number"]!=0){
         const char* name = doc["name"];
         const char* surname = doc["surname"];
         const char* phone_number = doc["phone_number"];
-        int group_id = doc["group_id"];
 
           // Initiate the query class instance
         String sql = "INSERT INTO esp_data.users (name,surname,phone_number,group_id) VALUES";
@@ -134,8 +127,6 @@ void postUser(){
         sql+=surname;
         sql+="\",\"";
         sql+=phone_number;
-        sql+="\",\"";
-        sql+=group_id;
         sql+="\")";
 
         setQuery(sql);
@@ -162,12 +153,11 @@ void updateUser(){
         http_rest_server.send(400);
     }
     else {   
-      if(doc["id"]!=0 && doc["name"]!=0 && doc["surname"]!=0 && doc["phone_number"]!=0 && doc["group_id"]!=0){
+      if(doc["id"]!=0 && doc["name"]!=0 && doc["surname"]!=0 && doc["phone_number"]!=0){
         int id = doc["id"];
         const char* name = doc["name"];
         const char* surname = doc["surname"];
         const char* phone_number = doc["phone_number"];
-        int group_id = doc["group_id"];
 
           // Initiate the query class instance
         String sql = "UPDATE esp_data.users SET name = \"";
@@ -176,8 +166,6 @@ void updateUser(){
         sql+=surname;
         sql+="\", phone_number = \"";
         sql+=phone_number;
-        sql+="\", group_id = ";
-        sql+=group_id;
         sql+=" WHERE id = ";
         sql+=id;
 
@@ -209,3 +197,57 @@ void deleteUser(){
         http_rest_server.send(200, "application/json", "{ \"id\": \""+id+"\"}");
         client.stop();    
     }
+
+                //GET USER GROUPS
+void getUserGroups(){
+    connectToDB();
+    String id = http_rest_server.arg("id"); 
+      // Initiate the query class instance
+    String sql = "SELECT g.id, g.name FROM esp_data.group_to_user gu JOIN esp_data.users u ";
+    sql+="ON gu.user_id=u.id ";
+    sql+="JOIN esp_data.groups g ";
+    sql+="ON g.id=gu.group_id ";
+    sql+="WHERE u.id= ";
+    sql+=id;
+    setQuery(sql);
+    MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
+      // Execute the query   
+    cur_mem->execute(QUERRY_BUFF);
+    column_names *columns = cur_mem->get_columns();
+    int i=-1;
+    Serial.println("Fetching with Rows");
+    row_values *row = NULL;
+    do
+    {   
+      i++;   
+        row = cur_mem->get_next_row();
+        if (row != NULL)
+        {
+            String batchnumber_str = "";
+            for (int f = 0; f < columns->num_fields; f++)
+            {
+                batchnumber_str = String(row->values[f]);
+                if(f==0)
+                groups[i].id=batchnumber_str.toInt();
+                if(f==1)
+                groups[i].name=batchnumber_str;
+            }
+        }
+    } while (row != NULL);
+    Serial.println("Done reading group details");
+  // Note: since there are no results, we do not need to read any data
+  // Deleting the cursor also frees up memory used
+    delete cur_mem;          
+     DynamicJsonDocument doc((i+1)*50+20);     
+     for (int x=0;x<i;x++){
+      doc[x]["id"]=groups[x].id;
+      doc[x]["name"]=groups[x].name;
+
+     }
+     memset(jsonChar,0, sizeof(jsonChar));
+     serializeJson(doc,jsonChar);
+     Serial.println(jsonChar);
+     http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+     http_rest_server.send(200, "application/json", jsonChar);
+     client.stop();    
+}

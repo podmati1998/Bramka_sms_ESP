@@ -35,7 +35,6 @@ class User{
   String name;
   String surname;
   String phone_number;
-  int group_id;
   User(){
   }
 };
@@ -81,7 +80,7 @@ void setup() {
   // Restart SIM800 module, it takes quite some time
   // To skip it, call init() instead of restart()
   Serial.println("Initializing modem...");
-  modem.restart();
+  modem.init();
   connectToNetwork();
   config_rest_server_routing();
   http_rest_server.begin();
@@ -102,16 +101,20 @@ void config_rest_server_routing() {
     http_rest_server.on("/api/users", HTTP_POST, postUser);
     http_rest_server.on("/api/user", HTTP_GET, getUser);
     http_rest_server.on("/api/users", HTTP_DELETE, deleteUser);
-    http_rest_server.on("/api/users", HTTP_PUT, updateUser);   
+    http_rest_server.on("/api/users", HTTP_PUT, updateUser);
+    http_rest_server.on("/api/user/groups", HTTP_GET, getUserGroups);  
     http_rest_server.on("/api/groups", HTTP_GET, getGroups);
     http_rest_server.on("/api/groups", HTTP_POST, postGroup);    
     http_rest_server.on("/api/group", HTTP_GET, getGroup);
-    http_rest_server.on("/api/group_users", HTTP_GET, getGroupUsers);
+    http_rest_server.on("/api/group/users", HTTP_GET, getGroupUsers);
     http_rest_server.on("/api/groups", HTTP_DELETE, deleteGroup);
+    http_rest_server.on("/api/groups/user", HTTP_DELETE, deleteUserFromGroup);
     http_rest_server.on("/api/groups", HTTP_PUT, updateGroup);
+    http_rest_server.on("/api/groups/user", HTTP_POST, postUserToGroup);
     http_rest_server.on("/api/send_number", HTTP_POST, sendToNumber);
     http_rest_server.on("/api/send_user", HTTP_POST, sendToUser);
     http_rest_server.on("/api/send_group", HTTP_POST, sendToGroup);
     http_rest_server.on("/api/history_element", HTTP_GET, getHistoryElement);
     http_rest_server.on("/api/history", HTTP_GET, getHistory);
+    
 }
