@@ -104,7 +104,7 @@ void config_rest_server_routing() {
     http_rest_server.on("/api/users", HTTP_PUT, updateUser);
     http_rest_server.on("/api/user/groups", HTTP_GET, getUserGroups);  
     http_rest_server.on("/api/groups", HTTP_GET, getGroups);
-    http_rest_server.on("/api/groups", HTTP_POST, postGroup);    
+    http_rest_server.on("/api/groups", HTTP_POST, postGroup);   
     http_rest_server.on("/api/group", HTTP_GET, getGroup);
     http_rest_server.on("/api/group/users", HTTP_GET, getGroupUsers);
     http_rest_server.on("/api/groups", HTTP_DELETE, deleteGroup);
@@ -116,5 +116,11 @@ void config_rest_server_routing() {
     http_rest_server.on("/api/send_group", HTTP_POST, sendToGroup);
     http_rest_server.on("/api/history_element", HTTP_GET, getHistoryElement);
     http_rest_server.on("/api/history", HTTP_GET, getHistory);
-    
+    //to chrome CORS ...
+        http_rest_server.on("/api/users", HTTP_OPTIONS, preResponse);
+        http_rest_server.on("/api/groups", HTTP_OPTIONS, preResponse);
+        http_rest_server.on("/api/groups/user", HTTP_OPTIONS, preResponse);
+        http_rest_server.on("/api/send_number", HTTP_OPTIONS, preResponse);
+        http_rest_server.on("/api/send_user", HTTP_OPTIONS, preResponse);
+        http_rest_server.on("/api/send_group", HTTP_OPTIONS, preResponse); 
 }

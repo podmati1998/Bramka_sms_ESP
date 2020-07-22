@@ -120,7 +120,7 @@ void postUser(){
         const char* phone_number = doc["phone_number"];
 
           // Initiate the query class instance
-        String sql = "INSERT INTO esp_data.users (name,surname,phone_number,group_id) VALUES";
+        String sql = "INSERT INTO esp_data.users (name,surname,phone_number) VALUES";
         sql+=" (\"";
         sql+=name;
         sql+="\",\"";
@@ -166,17 +166,16 @@ void updateUser(){
         sql+=surname;
         sql+="\", phone_number = \"";
         sql+=phone_number;
-        sql+=" WHERE id = ";
+        sql+="\" WHERE id = ";
         sql+=id;
 
         setQuery(sql);
         MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
         // Execute the query
         cur_mem->execute(QUERRY_BUFF);
-        int last_id = cur_mem->get_last_insert_id();
         delete cur_mem;
-        Serial.println(last_id);
-        getUserFromId(last_id);
+        Serial.println(id);
+        getUserFromId(id);
       }
     }
 }

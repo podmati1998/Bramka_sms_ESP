@@ -195,3 +195,10 @@ void connectToNetwork() {
 int sendSMS(String phone_number,String text){
   
 }
+
+int preResponse(){
+  Serial.println("PRE REQUEST RESPONSE!!!");
+  http_rest_server.sendHeader("Access-Control-Allow-Origin", "*");
+     http_rest_server.send(200, "text/plain", "0");
+     client.stop();  
+}

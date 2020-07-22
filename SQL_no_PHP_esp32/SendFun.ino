@@ -15,7 +15,7 @@ void sendToGroup(){
         const char* text = doc["text"];
         //GET USER NUMBER
         String sql = "SELECT u.id,u.name,u.surname,u.phone_number FROM esp_data.users u JOIN esp_data.group_to_user gu ";
-        sql+="ON u.group_id=gu.group_id WHERE gu.group_id=";
+        sql+="ON u.id=gu.user_id WHERE gu.group_id=";
         sql+=group_id;   
         setQuery(sql);
         MySQL_Cursor *cur_mem = new MySQL_Cursor(&conn);
